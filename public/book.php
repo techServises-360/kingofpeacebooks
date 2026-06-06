@@ -1,10 +1,16 @@
 <?php
-require_once __DIR__ . '/../includes/header.php';
-require_once __DIR__ . '/../includes/navbar.php';
+require_once __DIR__ . '/../app/config/config.php';
 $db = Database::getInstance();
+$bookM = new Book($db);
+$publicId = trim((string)($_GET['book'] ?? ''));
 $id = (int)($_GET['id'] ?? 0);
-$book = (new Book($db))->find($id);
+$book = $publicId !== '' ? $bookM->findByPublicId($publicId) : $bookM->find($id);
 if (!$book) { http_response_code(404); exit('Not found'); }
+$bookPublicId = (string)($book['public_id'] ?? '');
+$sharePath = BASE_URL . '/public/book.php' . ($bookPublicId !== '' ? '?book=' . urlencode($bookPublicId) : '?id=' . urlencode((string)$book['id']));
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? '';
+$shareUrl = $host !== '' && strpos($sharePath, 'http') !== 0 ? $scheme . '://' . $host . $sharePath : $sharePath;
 // Hide unapproved books unless admin or the submitter
 try {
   if (isset($book['status']) && $book['status'] !== 'approved') {
@@ -14,6 +20,10 @@ try {
     if (!$allow) { http_response_code(404); exit('Not found'); }
   }
 } catch (Throwable $e) { /* ignore if legacy schema */ }
+if ($publicId === '' && $bookPublicId !== '') {
+  header('Location: ' . BASE_URL . '/public/book.php?book=' . urlencode($bookPublicId), true, 301);
+  exit;
+}
 // Determine if current user has already purchased
 $paid = false;
 if (is_logged_in()) {
@@ -34,12 +44,26 @@ $userReview = null;
 if (is_logged_in()) {
   $userReview = $reviewM->findUserReview($book['id'], (int)current_user_id());
 }
+require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/navbar.php';
 ?>
 <div class="max-w-6xl mx-auto px-4 py-8">
   <?php if (function_exists('flash_render')) { flash_render(); } ?>
-  <div class="flex items-center gap-4 mb-6">
-    <img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="KingOfPeace Books" class="h-10 w-auto">
-    <h2 class="text-2xl font-bold text-brandBlue"><?php echo sanitize($book['title']); ?></h2>
+  <div class="flex items-center justify-between gap-4 mb-6">
+    <div class="flex items-center gap-4 min-w-0">
+      <img src="<?php echo BASE_URL; ?>/assets/images/logo.png" alt="KingOfPeace Books" class="h-10 w-auto">
+      <h2 class="text-2xl font-bold text-brandBlue truncate"><?php echo sanitize($book['title']); ?></h2>
+    </div>
+    <button type="button" id="share-book-button" data-share-url="<?php echo htmlspecialchars($shareUrl, ENT_QUOTES); ?>" class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-brandBlue shadow-sm hover:bg-gray-50" aria-label="Copy book link">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <path d="M8.59 13.51l6.83 3.98"></path>
+        <path d="M15.41 6.51L8.59 10.49"></path>
+      </svg>
+      <span id="share-book-label">Share</span>
+    </button>
   </div>
   <div class="grid gap-6 md:grid-cols-[280px_1fr]">
     <div class="relative w-full rounded-xl overflow-hidden bg-gray-50" style="padding-top:160%;">
@@ -73,7 +97,11 @@ if (is_logged_in()) {
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-xl font-semibold text-brandBlue">Reviews (<?php echo (int)$reviewsCount; ?>)</h3>
         <form method="get" class="flex items-center gap-2">
-          <input type="hidden" name="id" value="<?php echo $book['id']; ?>">
+          <?php if ($bookPublicId !== ''): ?>
+            <input type="hidden" name="book" value="<?php echo htmlspecialchars($bookPublicId); ?>">
+          <?php else: ?>
+            <input type="hidden" name="id" value="<?php echo (int)$book['id']; ?>">
+          <?php endif; ?>
           <label class="text-sm text-gray-600">Sort</label>
           <select name="sort" class="border border-gray-300 rounded-md px-2 py-1 text-sm" onchange="this.form.submit()">
             <option value="newest" <?php echo $sort==='newest'?'selected':''; ?>>Newest</option>
@@ -129,7 +157,7 @@ if (is_logged_in()) {
         </div>
         <?php if ($totalPages > 1): ?>
           <div class="flex items-center justify-center gap-2 mt-4">
-            <?php $base = BASE_URL . '/public/book.php?id=' . urlencode($book['id']) . '&sort=' . urlencode($sort) . '&page='; ?>
+            <?php $base = BASE_URL . '/public/book.php' . ($bookPublicId !== '' ? '?book=' . urlencode($bookPublicId) : '?id=' . urlencode((string)$book['id'])) . '&sort=' . urlencode($sort) . '&page='; ?>
             <a class="px-3 py-1 rounded border <?php echo $page<=1?'pointer-events-none opacity-50':'hover:bg-gray-50'; ?>" href="<?php echo $page<=1?'#':$base.($page-1); ?>">Prev</a>
             <span class="text-sm text-gray-600">Page <?php echo $page; ?> of <?php echo $totalPages; ?></span>
             <a class="px-3 py-1 rounded border <?php echo $page>=$totalPages?'pointer-events-none opacity-50':'hover:bg-gray-50'; ?>" href="<?php echo $page>=$totalPages?'#':$base.($page+1); ?>">Next</a>
@@ -166,4 +194,28 @@ if (is_logged_in()) {
     </div>
   </div>
 </div>
+<script>
+  (function () {
+    const button = document.getElementById('share-book-button');
+    const label = document.getElementById('share-book-label');
+    if (!button || !label) return;
+
+    button.addEventListener('click', async function () {
+      const url = button.getAttribute('data-share-url');
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: document.title, url });
+          return;
+        }
+
+        await navigator.clipboard.writeText(url);
+        label.textContent = 'Copied';
+        setTimeout(function () { label.textContent = 'Share'; }, 1800);
+      } catch (error) {
+        label.textContent = 'Copy failed';
+        setTimeout(function () { label.textContent = 'Share'; }, 1800);
+      }
+    });
+  })();
+</script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

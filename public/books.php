@@ -82,7 +82,7 @@ $pages = max(1, (int)ceil($total / $per_page));
   <div class="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
     <?php foreach ($items as $b): ?>
     <div class="flex flex-col">
-      <a href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo $b['id']; ?>" class="block">
+      <a href="<?php echo $bookModel->publicUrl($b); ?>" class="block">
         <div class="relative w-full" style="padding-top:140%;">
           <img class="absolute inset-0 w-full h-full object-cover rounded-lg ring-1 ring-black/10" src="<?php echo cover_src($b['cover_image']); ?>" alt="cover">
         </div>

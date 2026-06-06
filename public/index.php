@@ -3,7 +3,8 @@ $page_title = 'Home';
 require_once __DIR__ . '/../includes/header.php';
 require_once __DIR__ . '/../includes/navbar.php';
 $db = Database::getInstance();
-$books = (new Book($db))->allApproved();
+$bookM = new Book($db);
+$books = $bookM->allApproved();
 $reviewM = new Review($db);
 // compute global average rating
 $avgRow = $db->query('SELECT AVG(rating) AS a FROM reviews')->fetch();
@@ -97,7 +98,7 @@ $firstCover = $oldest && !empty($oldest['cover_image'])
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2.5">
       <?php foreach ($books as $b): ?>
       <div class="flex flex-col">
-        <a href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo $b['id']; ?>" class="block">
+        <a href="<?php echo $bookM->publicUrl($b); ?>" class="block">
           <div class="relative w-full" style="padding-top:140%;">
             <img class="absolute inset-0 w-full h-full object-cover rounded-lg ring-1 ring-white/10" src="<?php echo cover_src($b['cover_image']); ?>" alt="cover">
           </div>

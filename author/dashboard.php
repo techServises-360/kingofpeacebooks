@@ -168,7 +168,7 @@ $pages = max(1, (int)ceil($result['total'] / $result['per_page']));
                 <?php $pc = 0; try { $pc = $orderM->countPaidForBook((int)$b['id']); } catch (Throwable $e) {} ?>
                 <p class="text-xs text-gray-600 mt-1">Paid purchases: <?php echo (int)$pc; ?></p>
                 <div class="mt-1 flex gap-2 text-sm">
-                  <a class="text-brandBlue underline" href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo (int)$b['id']; ?>">Details</a>
+                  <a class="text-brandBlue underline" href="<?php echo $bookM->publicUrl($b); ?>">Details</a>
                   <a class="text-brandBlue underline" target="_blank" rel="noopener" href="<?php echo BASE_URL; ?>/admin/view-book-file.php?book_id=<?php echo (int)$b['id']; ?>">View File</a>
                 </div>
               </div>

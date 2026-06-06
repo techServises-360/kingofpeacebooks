@@ -7,10 +7,13 @@ $review_id = (int)($_POST['review_id'] ?? 0);
 $book_id = (int)($_POST['book_id'] ?? 0);
 $rating = (int)($_POST['rating'] ?? 0);
 $comment = trim((string)($_POST['comment'] ?? ''));
+$bookM = new Book($db);
+$book = $book_id > 0 ? $bookM->find($book_id) : null;
+$returnUrl = $book ? $bookM->publicUrl($book) : BASE_URL . '/public/books.php';
 
 if ($review_id <= 0 || $book_id <= 0 || $rating <= 0 || $comment === '') {
   flash_set('error', 'Invalid review submission.');
-  header('Location: ' . BASE_URL . '/public/book.php?id=' . $book_id);
+  header('Location: ' . $returnUrl);
   exit;
 }
 
@@ -27,4 +30,4 @@ if ($ok) {
 } else {
   flash_set('error', 'Could not update review.');
 }
-header('Location: ' . BASE_URL . '/public/book.php?id=' . $book_id);
+header('Location: ' . $returnUrl);

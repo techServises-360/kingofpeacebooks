@@ -70,7 +70,7 @@ $revenue = $orderM->revenueTotal();
     <h3 class="text-xl font-semibold text-brandBlue mb-3">Recent Books</h3>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <?php foreach ($recent as $rb): ?>
-      <a href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo $rb['id']; ?>" class="flex items-center gap-3 border border-gray-200 rounded-xl p-3 bg-white hover:shadow">
+      <a href="<?php echo $bookM->publicUrl($rb); ?>" class="flex items-center gap-3 border border-gray-200 rounded-xl p-3 bg-white hover:shadow">
         <img src="<?php echo cover_src($rb['cover_image']); ?>" class="w-12 h-12 rounded object-cover" alt="thumb">
         <div class="min-w-0">
           <p class="font-semibold text-brandBlue truncate"><?php echo sanitize($rb['title']); ?></p>

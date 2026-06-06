@@ -36,7 +36,9 @@ try {
         '001_create_users_table.sql',
         '002_create_books_table.sql', 
         '003_create_orders_table.sql',
-        '004_create_reviews_table.sql'
+        '004_create_reviews_table.sql',
+        '005_add_author_request_fields_to_users.sql',
+        '006_add_public_id_to_books.sql'
     ];
 
     // Run each migration

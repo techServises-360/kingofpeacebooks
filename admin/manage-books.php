@@ -54,7 +54,7 @@ flash_render();
             <?php endif; ?>
           </td>
           <td class="px-4 py-3 border-b space-x-2">
-            <a class="inline-block bg-brandBlue text-white px-3 py-1 rounded" href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo $b['id']; ?>">View</a>
+            <a class="inline-block bg-brandBlue text-white px-3 py-1 rounded" href="<?php echo $bookModel->publicUrl($b); ?>">View</a>
             <a class="inline-block border border-gray-300 px-3 py-1 rounded" href="<?php echo BASE_URL; ?>/admin/edit-book.php?id=<?php echo $b['id']; ?>">Edit</a>
             <form id="form-delete-<?php echo $b['id']; ?>" class="inline" method="post" action="<?php echo BASE_URL; ?>/admin/delete-book.php">
               <?php csrf_input(); ?>

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/navbar.php';
 require_login();
 $db = Database::getInstance();
 $orderM = new Order($db);
+$bookM = new Book($db);
 $paid = $orderM->paidWithBooksByUser((int)current_user_id());
 ?>
 <div class="max-w-6xl mx-auto px-4 py-8">
@@ -22,7 +23,7 @@ $paid = $orderM->paidWithBooksByUser((int)current_user_id());
           <h3 class="text-brandBlue font-semibold text-lg line-clamp-2"><?php echo sanitize($b['title']); ?></h3>
           <p class="text-sm text-gray-600 truncate">by <?php echo sanitize($b['author']); ?></p>
           <div class="mt-3 flex gap-2">
-            <a class="inline-block bg-brandBlue text-white px-3 py-2 rounded-md" href="<?php echo BASE_URL; ?>/public/book.php?id=<?php echo $b['id']; ?>">View</a>
+            <a class="inline-block bg-brandBlue text-white px-3 py-2 rounded-md" href="<?php echo $bookM->publicUrl($b); ?>">View</a>
             <a class="inline-block bg-brandGold text-black px-3 py-2 rounded-md" href="<?php echo BASE_URL; ?>/public/download.php?book_id=<?php echo $b['id']; ?>">Download</a>
           </div>
         </div>

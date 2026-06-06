@@ -3,6 +3,24 @@ class Book {
   private PDO $db;
   public function __construct(PDO $db) { $this->db = $db; }
 
+  private function generatePublicId(): string {
+    return 'bk_' . bin2hex(random_bytes(8));
+  }
+
+  private function createUniquePublicId(): string {
+    try {
+      do {
+        $publicId = $this->generatePublicId();
+        $st = $this->db->prepare('SELECT 1 FROM books WHERE public_id = ? LIMIT 1');
+        $st->execute([$publicId]);
+      } while ($st->fetch());
+
+      return $publicId;
+    } catch (Throwable $e) {
+      return $this->generatePublicId();
+    }
+  }
+
   public function all() {
     return $this->db->query('SELECT * FROM books ORDER BY created_at DESC')->fetchAll();
   }
@@ -25,21 +43,36 @@ class Book {
     return $st->fetch();
   }
 
+  public function findByPublicId(string $publicId) {
+    $st = $this->db->prepare('SELECT * FROM books WHERE public_id = ?');
+    $st->execute([$publicId]);
+    return $st->fetch();
+  }
+
+  public function publicUrl(array $book): string {
+    if (!empty($book['public_id'])) {
+      return BASE_URL . '/public/book.php?book=' . urlencode((string)$book['public_id']);
+    }
+
+    return BASE_URL . '/public/book.php?id=' . urlencode((string)$book['id']);
+  }
+
   public function create(array $data) {
+    $publicId = $this->createUniquePublicId();
     // Try to insert with moderation fields if present; fallback to legacy schema
     try {
-      $sql = 'INSERT INTO books (title,author,price,base_price,discount_percentage,description,cover_image,file_path,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)';
+      $sql = 'INSERT INTO books (public_id,title,author,price,base_price,discount_percentage,description,cover_image,file_path,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)';
       $st = $this->db->prepare($sql);
       $st->execute([
-        $data['title'], $data['author'], $data['price'], $data['base_price'] ?? null, $data['discount_percentage'] ?? 0, $data['description'], $data['cover_image'], $data['file_path'], 'pending'
+        $publicId, $data['title'], $data['author'], $data['price'], $data['base_price'] ?? null, $data['discount_percentage'] ?? 0, $data['description'], $data['cover_image'], $data['file_path'], 'pending'
       ]);
     } catch (Throwable $e) {
       // Fallback: schema without status but still has base_price/discount_percentage
       try {
-        $sql = 'INSERT INTO books (title,author,price,base_price,discount_percentage,description,cover_image,file_path,created_at) VALUES (?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)';
+        $sql = 'INSERT INTO books (public_id,title,author,price,base_price,discount_percentage,description,cover_image,file_path,created_at) VALUES (?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)';
         $st = $this->db->prepare($sql);
         $st->execute([
-          $data['title'], $data['author'], $data['price'], $data['base_price'] ?? null, $data['discount_percentage'] ?? 0, $data['description'], $data['cover_image'], $data['file_path']
+          $publicId, $data['title'], $data['author'], $data['price'], $data['base_price'] ?? null, $data['discount_percentage'] ?? 0, $data['description'], $data['cover_image'], $data['file_path']
         ]);
       } catch (Throwable $fallbackE) {
         // Fallback without new fields
