@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: bookstore
+    env: docker
+    plan: free
+    healthCheckPath: /public/index.php
+    envVars:
+      # Neon PostgreSQL Database
+      - key: NEON_DB_HOST
+        value: ${NEON_DB_HOST}
+      - key: NEON_DB_PORT
+        value: ${NEON_DB_PORT}
+      - key: NEON_DB_NAME
+        value: ${NEON_DB_NAME}
+      - key: NEON_DB_USER
+        value: ${NEON_DB_USER}
+      - key: NEON_DB_PASSWORD
+        value: ${NEON_DB_PASSWORD}
+      # Paystack Configuration
+      - key: PAYSTACK_PUBLIC_KEY
+        value: ${PAYSTACK_PUBLIC_KEY}
+      - key: PAYSTACK_SECRET_KEY
+        value: ${PAYSTACK_SECRET_KEY}

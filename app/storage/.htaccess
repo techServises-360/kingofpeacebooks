@@ -1,0 +1,2 @@
+# Deny all access to storage from the web
+Deny from all

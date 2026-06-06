@@ -1,0 +1,16 @@
+# Enforce HTTPS
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Block access to the app directory from the web
+RewriteRule ^app/ - [F]
+</IfModule>
+
+# PHP security headers
+<IfModule mod_headers.c>
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-XSS-Protection "1; mode=block"
+</IfModule>

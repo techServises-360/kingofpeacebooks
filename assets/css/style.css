@@ -1,0 +1,41 @@
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff;color:#222}
+.container{max-width:1100px;margin:0 auto;padding:0 16px}
+.navbar{background:#0a4ea1;color:#fff;position:sticky;top:0}
+.navbar .container{display:flex;align-items:center;justify-content:space-between;height:64px}
+.navbar a{color:#fff;text-decoration:none;margin:0 8px}
+.logo{font-weight:700;font-size:20px}
+.logo span{color:#e0b100}
+.btn{background:#0a4ea1;color:#fff;padding:8px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.2)}
+.btn.gold{background:#e0b100;color:#111}
+.hero{padding:48px 0;text-align:center}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}
+.card{border:1px solid #eaeaea;border-radius:10px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.card img{width:100%;height:240px;object-fit:cover}
+.card .content{padding:12px}
+.price{color:#e0b100;font-weight:700}
+.footer{margin-top:48px;padding:24px 0;border-top:1px solid #eee;background:#fafafa}
+.form{max-width:420px;margin:32px auto;padding:24px;border:1px solid #eee;border-radius:10px}
+input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:8px 0}
+label{font-weight:600}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border:1px solid #eee;padding:10px;text-align:left}
+.table th{background:#f7f7f7}
+
+/* Hide scrollbars globally but keep scrolling enabled */
+/* Chrome, Safari, Opera */
+*::-webkit-scrollbar{width:0 !important;height:0 !important;-webkit-appearance:none}
+*::-webkit-scrollbar-thumb{background:transparent !important;border:none !important}
+*::-webkit-scrollbar-track{background:transparent !important}
+/* Firefox */
+*{scrollbar-width:none !important;scrollbar-color:transparent transparent}
+/* IE and Edge */
+*{-ms-overflow-style:none}
+
+/* More reliable opt-in: apply to elements with .no-scrollbar */
+.no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+.no-scrollbar::-webkit-scrollbar { display: none !important; }
+
+/* Explicit targets: navbar scrollers */
+nav ul { scrollbar-width: none !important; }
+nav ul::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }

@@ -1,0 +1,2 @@
+# Deny all access to stored book files
+Deny from all

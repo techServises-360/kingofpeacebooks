@@ -1,0 +1,26 @@
+# Restrict access to admin directory
+<Files "admin">
+    Order deny,allow
+    Deny from all
+    Allow from all
+</Files>
+
+# Block access to sensitive files
+<Files "*.log">
+    Require all denied
+</Files>
+
+<Files "*.sql">
+    Require all denied
+</Files>
+
+<Files "config.php">
+    Require all denied
+</Files>
+
+# Alternative for older Apache versions
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+    Allow from all
+</IfModule>
